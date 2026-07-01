@@ -20,13 +20,14 @@
     },
     {
       "parameters": {
+        "modelName": "models/gemini-2.5-flash",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1.1,
       "position": [
-        80,
-        208
+        208,
+        240
       ],
       "id": "98195a6e-ce13-47a0-9e8e-69a5567cfcba",
       "name": "Google Gemini Chat Model",
@@ -63,8 +64,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        368,
-        208
+        352,
+        224
       ],
       "id": "23e74f45-7521-47a2-afef-387c628e1b0b",
       "name": "HTTP Request Google Search"
@@ -147,6 +148,286 @@
       ],
       "id": "6916b57e-64ba-4971-a4b2-0d001b4e562f",
       "name": "IF (Competitor List Approved?)"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        976,
+        160
+      ],
+      "id": "61fc481b-fc22-484c-bc15-a34421382582",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "C2J8k0NkT4t8vqz4",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Market Intelligence Orchestrator for Zepto, \na quick-commerce company in India.\n\nYour job is to gather the latest news, market developments, \nand regulatory/legal changes affecting the following competitors \nin the Indian quick-commerce sector:\n\nCompetitors: {{ $('AI Agent (Get Competitors List)').item.json.output }}\n\nTime window: last 24 hours\n\nYou MUST use all available search tools to find current information.\nSearch for:\n1. Recent news about each competitor specifically\n2. General quick-commerce industry news in India\n3. Any new regulations, government policies, or legal developments \n   affecting quick-commerce, gig workers, or food delivery in India\n\nFor each item you find, return a structured response with:\n- Category: competitor_news OR industry_news OR regulatory_news\n- Competitor: which competitor this relates to (if applicable)\n- Title: headline of the event\n- Summary: 2-3 sentence plain English summary\n- Why it matters: one sentence on business impact for Zepto\n- Impact score: 1-10 (10 being most impactful)\n- Risk hints: financial, regulatory, reputational, operational, \n  strategic, or none\n\nReturn plain text only, no Markdown formatting.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        976,
+        -48
+      ],
+      "id": "ed2b70f7-f6ea-4f6c-9407-e2bc21e02635",
+      "name": "AI Agent (Get Market Insights)"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Makes an HTTP request to Google Search API to fetch competitor news and social media signals",
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "Google"
+            },
+            {
+              "name": "q",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', `The search query to find competitor news and market signals`, 'string') }}"
+            },
+            {
+              "name": "api_key",
+              "value": "15e452fb8ed395d64b24826a9284c85498f5f8a0c602b36cacb68866d793c585"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1056,
+        288
+      ],
+      "id": "9869b4a8-d744-454a-b493-b9f2b95c606e",
+      "name": "HTTP Request Google Search1"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Searches millions of news articles from thousands of sources and returns relevant results",
+        "url": "https://newsapi.org/v2/everything",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `Keywords to search for in news articles`, 'string') }}"
+            },
+            {
+              "name": "from",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', `Start date for articles in YYYY-MM-DD format. \nMust be within the last 30 days only. \nUse yesterday's date as the start date.`, 'string') }}"
+            },
+            {
+              "name": "to",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', `End date for articles in format YYYY-MM-DD`, 'string') }}"
+            },
+            {
+              "name": "apiKey",
+              "value": "c2cf9d195c02455db71ddd3b1e7c1ad9"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1232,
+        288
+      ],
+      "id": "a9910fb5-61e5-4a50-ba20-fbacf5774ad4",
+      "name": "HTTP Request Search Articles"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Fetches live top and breaking headlines from major news sources, sorted by most recent first",
+        "url": "https://newsapi.org/v2/top-headlines",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `Keywords or phrase to search headlines for`, 'string') }}"
+            },
+            {
+              "name": "apiKey",
+              "value": "=c2cf9d195c02455db71ddd3b1e7c1ad9"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1136,
+        464
+      ],
+      "id": "d7792299-3627-4d61-b05a-4e23fa3c7706",
+      "name": "HTTP Request Get Headlines"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1328,
+        160
+      ],
+      "id": "d67acd30-0013-4667-bd69-d15fa3292dbe",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "C2J8k0NkT4t8vqz4",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI Market Intelligence Analyst preparing executive briefings for Zepto leadership.\n\nYour task is to summarize the provided market intelligence findings into a concise but insight-rich business update.\n\nInstructions:\n\n* Write approximately 120–180 words.\n* Target a reading time of about 40 seconds.\n* Use 6–9 concise sentences.\n* Prioritize the most business-critical developments first.\n* Focus on:\n\n  * Major competitor moves\n  * Funding announcements\n  * Market expansion activities\n  * Pricing wars or aggressive promotions\n  * Partnerships, acquisitions, or strategic alliances\n  * Regulatory, legal, or compliance developments\n  * Overall quick-commerce market conditions affecting Zepto\n\nAdditional Rules:\n\n* Emphasize developments with direct business impact.\n* If multiple events exist, prioritize by severity and strategic importance.\n* Highlight patterns or trends when relevant.\n* Maintain a neutral, executive-level tone.\n* Avoid hype, speculation, or sensational language.\n* Do NOT invent facts beyond the provided content.\n* Avoid repetitive wording and generic filler statements.\n* Keep sentences information-dense but easy to scan quickly.\n\nOutput Requirements:\n\n* Plain professional English only\n* No Markdown\n* No bullet points\n* No headers\n* No numbering\n* No introductory phrases\n* Write as if this will be sent directly to senior business leadership\n\nContent to summarize:\n{{ $('AI Agent (Get Market Insights)').item.json.output }}\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1328,
+        -48
+      ],
+      "id": "51b22354-a90f-4da6-85e3-f39e70772e01",
+      "name": "Summarization LLM"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1680,
+        96
+      ],
+      "id": "0a903885-a27b-436d-b9e7-5cc542fc660c",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "C2J8k0NkT4t8vqz4",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI Business Risk Analyst evaluating competitive and operational threats for Zepto in the Indian quick-commerce market.\n\nYour task is to analyze the provided Market Intelligence Summary and determine the overall business risk level for Zepto.\n\nEvaluate risk using these dimensions:\n\n* Competitive Threat\n* Regulatory Threat\n* Financial Threat\n* Reputation & Safety Threat\n* Market Expansion Threat\n\nRisk Classification Rules:\n\nHIGH risk:\n\n* Competitor raises funding above $100M\n* Major regulatory investigation, restriction, ban, or compliance action\n* Serious safety incident, customer harm, data breach, or reputational crisis\n* Aggressive expansion by competitors into Zepto’s major markets\n* Multiple medium-risk developments occurring together\n* Events likely to materially affect revenue, growth, customer retention, or operations\n\nMEDIUM risk:\n\n* Significant pricing wars, discounts, or promotional campaigns\n* New competitor entry\n* Strategic partnership, acquisition discussions, or ecosystem alliances\n* Moderate regulatory developments or consultations\n* Strong hiring expansion or supply-chain scaling by competitors\n* Events that may affect growth or margins but are not immediately critical\n\nLOW risk:\n\n* Routine announcements\n* General industry commentary\n* Minor feature launches or operational updates\n* Weak rumors without supporting evidence\n* No meaningful business impact detected\n\nInstructions:\n\n* Base your assessment ONLY on the provided summary.\n* Do NOT invent facts.\n* Prioritize recent, credible, and high-impact developments.\n* If evidence is weak or uncertain, reduce the severity accordingly.\n* Consider cumulative impact if multiple developments are present.\n* Keep explanations concise and business-focused.\n\nReturn output in this exact format:\n\nRISK_LEVEL: [LOW or MEDIUM or HIGH]\n\nCONFIDENCE: [LOW or MEDIUM or HIGH]\n\nTOP_REASONS:\n\n1. [specific reason grounded in the summary]\n2. [specific reason grounded in the summary]\n3. [specific reason grounded in the summary]\n\nIMPACT_AREAS:\n\n1. [growth / customer acquisition / operations / margins / compliance / reputation etc.]\n2. [impact area]\n3. [impact area]\n\nRECOMMENDED_ACTIONS:\n\n1. [clear business recommendation]\n2. [clear business recommendation]\n3. [clear business recommendation]\n\nMarket Intelligence Summary:\n{{ $('Summarization LLM').item.json.response.text }}\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1680,
+        -48
+      ],
+      "id": "55729783-6c74-486b-81bd-b831b91ceea4",
+      "name": "Risk Analysis LLM"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ad7375fd-6acf-4315-9e68-27a1a9eb47b0",
+              "leftValue": "={{ $json.response.text }}",
+              "rightValue": "RISK_LEVEL: HIGH",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "5256e6c8-6c69-42ca-a520-9e7bf45dc9f5",
+              "leftValue": "={{ $json.response.text }}",
+              "rightValue": "RISK_LEVEL: MEDIUM",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1872,
+        176
+      ],
+      "id": "89e59624-ad5d-4e50-90e0-2fbd1ea403b2",
+      "name": "IF (Risk Level High or Medium?)"
+    },
+    {
+      "parameters": {
+        "sendTo": "tashviwadhwa@gmail.com",
+        "subject": "=Market Intelligence Alert: Risk Detected - Zepto Daily Intelligence Run",
+        "emailType": "text",
+        "message": "=Hello,  This is an automated alert from the Zepto Market Intelligence System.  A significant risk has been detected in today's competitive  intelligence run that requires your attention.  INTELLIGENCE SUMMARY: {{ $('Summarization LLM').item.json.response.text }}  RISK ASSESSMENT: {{ $('Risk Analysis LLM').item.json.response.text }}  This alert was generated automatically based on today's market  intelligence scan. Please review the findings and take  appropriate action.  Regards, Market Intelligence Automation System",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2080,
+        -64
+      ],
+      "id": "22c5f007-b547-4f2b-b4f2-b608cb54d7ad",
+      "name": "Gmail (Send Risk Alert)",
+      "webhookId": "b25d79bd-1039-4e7e-9046-7c2a01c08938",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4CYUzKHc7JvCK5Kc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/events/log",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2304,
+        96
+      ],
+      "id": "6e0b035d-2c89-46dd-a262-fbd3a33e3c48",
+      "name": "HTTP Request (Log to Database)"
     }
   ],
   "pinData": {},
@@ -208,10 +489,144 @@
     },
     "IF (Competitor List Approved?)": {
       "main": [
-        [],
+        [
+          {
+            "node": "AI Agent (Get Market Insights)",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "AI Agent (Get Competitors List)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent (Get Market Insights)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request Google Search1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent (Get Market Insights)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request Search Articles": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent (Get Market Insights)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request Get Headlines": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent (Get Market Insights)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent (Get Market Insights)": {
+      "main": [
+        [
+          {
+            "node": "Summarization LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarization LLM",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarization LLM": {
+      "main": [
+        [
+          {
+            "node": "Risk Analysis LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Risk Analysis LLM",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Risk Analysis LLM": {
+      "main": [
+        [
+          {
+            "node": "IF (Risk Level High or Medium?)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF (Risk Level High or Medium?)": {
+      "main": [
+        [
+          {
+            "node": "Gmail (Send Risk Alert)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request (Log to Database)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail (Send Risk Alert)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request (Log to Database)",
             "type": "main",
             "index": 0
           }
@@ -225,7 +640,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "84712375-342c-40bf-a6fa-73f06b5bffe5",
+  "versionId": "8017b9d5-3019-4b90-af38-8cae2301956b",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "aa3798224b2aeeb971865e9cfd709e096d90ac23620b3dbb0001adcba31e2da0"
