@@ -83,6 +83,70 @@
       ],
       "id": "fc2a2a3e-06cd-4aee-92a3-7806dacca366",
       "name": "AI Agent (Get Competitors List)"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "tashviwadhwa@gmail.com",
+        "subject": "Approval Required: Competitor List for Daily Market Intelligence Run",
+        "message": "=Hello,\n\nThe daily Market Intelligence workflow has generated a proposed \ncompetitor list for Zepto in the quick-commerce sector.\n\nPlease review the list below and approve or reject it before \nthe analysis proceeds.\n\nCompetitor List:\n{{ $('AI Agent (Get Competitors List)').item.json.output }}\n\nIf no action is taken, the workflow will remain paused.\n\nThank you,\nMarket Intelligence Automation System",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "d4a34438-e01b-484b-a020-7f32840288d0",
+      "name": "Send message and wait for response",
+      "webhookId": "ed83d9eb-c65c-45fb-9a00-38b8bd673874",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4CYUzKHc7JvCK5Kc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f69a196c-a49e-4027-9ee8-420f4df9d82e",
+              "leftValue": "={{ $('Send message and wait for response').item.json.data.approved }}",
+              "rightValue": "=true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        768,
+        0
+      ],
+      "id": "6916b57e-64ba-4971-a4b2-0d001b4e562f",
+      "name": "IF (Competitor List Approved?)"
     }
   ],
   "pinData": {},
@@ -119,6 +183,40 @@
           }
         ]
       ]
+    },
+    "AI Agent (Get Competitors List)": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "IF (Competitor List Approved?)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF (Competitor List Approved?)": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Agent (Get Competitors List)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -127,7 +225,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "55098785-f238-4ae5-926c-dbde03245e45",
+  "versionId": "84712375-342c-40bf-a6fa-73f06b5bffe5",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "aa3798224b2aeeb971865e9cfd709e096d90ac23620b3dbb0001adcba31e2da0"
