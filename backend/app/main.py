@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from app.routes.events import router as events_router
 import os
 load_dotenv()
 app = FastAPI(
@@ -28,3 +29,4 @@ def root():
         "message": "Zepto Market Intelligence API is running",
         "docs": "http://localhost:8000/docs"
     }
+app.include_router(events_router, prefix="/api/events", tags=["Events"])
