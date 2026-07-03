@@ -3,12 +3,32 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from app.routes.events import router as events_router
 from app.routes.deduplication import router as deduplication_router
+from contextlib import asynccontextmanager
+from app.database import get_db
 import os
 load_dotenv()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: load embeddings from database into memory
+    print("Loading embeddings from database...")
+    try:
+        db = next(get_db())
+        from app.services.deduplication import load_embeddings_from_db
+        load_embeddings_from_db(db)
+        db.close()
+    except Exception as e:
+        print(f"Could not load embeddings on startup: {e}")
+    
+    yield  # Server runs here
+    
+    # Shutdown: cleanup if needed
+    print("Shutting down...")
+
 app = FastAPI(
     title="Market Intelligence API",
     description="Backend service for Zepto market intelligence and risk monitoring pipeline",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 app.add_middleware(
     CORSMiddleware,
