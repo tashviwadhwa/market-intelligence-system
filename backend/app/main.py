@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from app.routes.events import router as events_router
+from app.routes.deduplication import router as deduplication_router
 import os
 load_dotenv()
 app = FastAPI(
@@ -30,3 +31,8 @@ def root():
         "docs": "http://localhost:8000/docs"
     }
 app.include_router(events_router, prefix="/api/events", tags=["Events"])
+app.include_router(
+    deduplication_router, 
+    prefix="/api/deduplication", 
+    tags=["Deduplication"]
+)
