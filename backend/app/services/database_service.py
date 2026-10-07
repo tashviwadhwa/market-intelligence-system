@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from app.models.db_models import MarketEventDB, EventEmbeddingDB
 from app.models.event import MarketEvent
+from app.services.risk_scoring import hybrid_score
 from datetime import datetime
 from typing import List, Optional
 import numpy as np
@@ -9,18 +10,39 @@ import numpy as np
 class DatabaseService:
     
     def save_event(self, db: Session, event: MarketEvent) -> MarketEventDB:
-        """Save a new market event to the database."""
+        """Save a new market event, scored with the hybrid (LLM + rules) risk engine.
+
+        n8n sends the LLM's own risk level. We keep that as llm_risk_level and
+        store the hybrid result as risk_level, so everything downstream
+        (dashboard, summaries) uses the hybrid level.
+        """
+        llm_level = event.risk_level if isinstance(event.risk_level, str) else event.risk_level.value
+        confidence = event.confidence if isinstance(event.confidence, str) else event.confidence.value
+        source_count = event.source_count or 1
+
+        hybrid = hybrid_score(
+            text=f"{event.summary}\n{event.top_reasons}",
+            llm_risk_level=llm_level,
+            llm_confidence=confidence,
+            source_count=source_count,
+        )
+
         db_event = MarketEventDB(
             date=event.date,
             competitors=event.competitors,
             summary=event.summary,
-            risk_level=event.risk_level if isinstance(event.risk_level, str) else event.risk_level.value,
-            confidence=event.confidence if isinstance(event.confidence, str) else event.confidence.value,
+            risk_level=hybrid["final_risk_level"],
+            confidence=confidence,
             top_reasons=event.top_reasons,
             recommended_actions=event.recommended_actions,
             impact_areas=event.impact_areas,
             source=event.source or "n8n-pipeline",
-            source_count=1,
+            source_count=source_count,
+            llm_risk_level=llm_level,
+            final_score=hybrid["final_score"],
+            rule_points=hybrid["rule_points"],
+            rules_fired=hybrid["rules_fired"],
+            needs_review=hybrid["needs_review"],
             received_at=datetime.now()
         )
         db.add(db_event)

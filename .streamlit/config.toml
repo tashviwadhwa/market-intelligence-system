@@ -1,0 +1,16 @@
+# Theme for the Market Intelligence dashboard.
+# Streamlit reads this file from the folder you run `streamlit run` in,
+# so keep it at the project root: market-intelligence-system/.streamlit/config.toml
+
+[theme]
+base = "dark"
+primaryColor = "#C9A7FF"
+backgroundColor = "#1A0F24"
+secondaryBackgroundColor = "#26172F"
+textColor = "#F1ECF6"
+font = "Bricolage Grotesque:https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap"
+headingFont = "Bricolage Grotesque:https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap"
+codeFont = "IBM Plex Mono:https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap"
+
+[theme.sidebar]
+backgroundColor = "#140B1C"

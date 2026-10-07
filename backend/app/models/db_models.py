@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, TIMESTAMP
+from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, Float, Boolean
 from sqlalchemy.dialects.postgresql import ARRAY, FLOAT, JSONB
 from sqlalchemy.sql import func
 from app.database import Base
@@ -17,6 +17,12 @@ class MarketEventDB(Base):
     impact_areas = Column(Text, nullable=False)
     source = Column(String(50), default="n8n-pipeline")
     source_count = Column(Integer, default=1)
+    # Hybrid risk scoring (risk_level above holds the FINAL hybrid level)
+    llm_risk_level = Column(String(10))          # what the LLM alone said
+    final_score = Column(Float)                  # 1.0 (LOW) to 3.0 (HIGH)
+    rule_points = Column(Integer)                # points from the rule engine
+    rules_fired = Column(JSONB)                  # which rules fired and why
+    needs_review = Column(Boolean, default=False)  # LLM and rules strongly disagree
     received_at = Column(TIMESTAMP, server_default=func.now())
     created_at = Column(TIMESTAMP, server_default=func.now())
 

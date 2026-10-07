@@ -23,6 +23,7 @@ class MarketEvent(BaseModel):
     recommended_actions: str
     impact_areas: str
     source: Optional[str] = "n8n-pipeline"
+    source_count: Optional[int] = 1
 
     class Config:
         use_enum_values = True

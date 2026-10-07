@@ -56,3 +56,6 @@ app.include_router(
     prefix="/api/deduplication", 
     tags=["Deduplication"]
 )
+
+from app.routes.risk import router as risk_router
+app.include_router(risk_router, prefix="/api/risk", tags=["Risk scoring"])
