@@ -31,6 +31,7 @@ DEFAULT_WATCHLIST = (
     "Blinkit, Swiggy Instamart, BigBasket, Flipkart Minutes, JioMart, Amazon Fresh"
 )
 STRIP_DAYS = 30          # how many days the strip shows
+LOCAL_TZ = "Asia/Kolkata"  # times are shown in India time
 STALE_AFTER_HOURS = 26   # the pipeline runs daily; longer than this means a missed run
 MAX_SQUARES = 40         # rival board: squares per row before showing "+n"
 
@@ -173,9 +174,17 @@ def load_events():
             df[col] = ""
 
     # format="mixed": timestamps may or may not include microseconds
-    df["created_at"] = pd.to_datetime(df["created_at"], errors="coerce", format="mixed")
+    # Supabase stores times in UTC; show them in India time.
+    # format="mixed": timestamps may or may not include microseconds
+    df["created_at"] = (
+        pd.to_datetime(df["created_at"], errors="coerce", format="mixed")
+        .dt.tz_localize("UTC")
+        .dt.tz_convert(LOCAL_TZ)
+        .dt.tz_localize(None)
+    )
     df["date_parsed"] = pd.to_datetime(df["date"], errors="coerce", format="mixed")
-    df["day"] = df["date_parsed"].fillna(df["created_at"]).dt.normalize()
+    # The day a run happened, in India time (the pipeline's own date field is UTC)
+    df["day"] = df["created_at"].fillna(df["date_parsed"]).dt.normalize()
     df["risk_level"] = df["risk_level"].astype(str).str.upper()
     df["confidence"] = df["confidence"].astype(str).str.upper()
     df["risk_score"] = df["risk_level"].map(RISK_SCORE)
@@ -368,7 +377,7 @@ def board_html(events, watchlist):
     for name, hits in rows:
         squares = "".join(
             f'<span style="background:{RISK_COLORS[r.risk_level]}" '
-            f'title="{r.date}: {r.risk_level.title()} risk"></span>'
+            f'title="{r.day:%d %b}: {r.risk_level.title()} risk"></span>'
             for r in hits.tail(MAX_SQUARES).itertuples()
         )
         extra = f"<em>+{len(hits) - MAX_SQUARES} earlier</em>" if len(hits) > MAX_SQUARES else ""
@@ -556,7 +565,7 @@ with tab_log:
                 mime="text/csv",
             )
             labels = {
-                int(r.id): f"Run #{r.id}, {r.date}, {r.risk_level.title()} risk"
+                int(r.id): f"Run #{r.id}, {r.day:%d %b %Y}, {r.risk_level.title()} risk"
                 for r in filtered.itertuples()
             }
             chosen = st.selectbox("Print the slip for", list(labels), format_func=labels.get)
